@@ -1,0 +1,20 @@
+{
+  "type": "toysol:sieve",
+  "time": "800",
+  "durability": "2",
+  "power": "60",
+  "ingredients": [
+    {
+      "item": "minecraft:cobblestone"
+    },
+    {
+      "tag": "minecraft:pickaxe"
+    }
+  ],
+  "result": {
+    "item": "minecraft:gravel"
+  },
+  "icon": {
+    "item": "minecraft:iron_pickaxe"
+  }
+}
