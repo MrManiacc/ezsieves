@@ -1,0 +1,18 @@
+{
+  "type": "sieves:sieve",
+  "time": "20",
+  "durability": "1",
+  "power": "20",
+  "ingredients": [
+    {
+      "tag": "minecraft:logs"
+    },
+    {
+      "tag": "minecraft:axes"
+    }
+  ],
+  "result": {
+    "item": "minecraft:gravel",
+    "count": 5
+  }
+}

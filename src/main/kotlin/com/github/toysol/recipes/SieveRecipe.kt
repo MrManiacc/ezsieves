@@ -26,7 +26,6 @@ class SieveRecipe(
     val result: ItemStack,
     val time: Int,
     val durability: Int,
-    private val icon: ItemStack = ItemStack(Items.DIAMOND_PICKAXE)
 ) : ISieveRecipe {
 
     override fun matches(inv: Container, pLevel: Level): Boolean {
@@ -50,7 +49,6 @@ class SieveRecipe(
         return ingredients
     }
 
-    fun getIcon(): ItemStack = icon
 
     override fun getType(): RecipeType<*> {
         return Sieve
@@ -72,8 +70,7 @@ class SieveRecipe(
                 ingredients[index] = ingredient
             }
             val result = ShapedRecipe.itemStackFromJson(json.getAsJsonObject("result"))
-            val icon = ShapedRecipe.itemStackFromJson(json.getAsJsonObject("icon"))
-            return SieveRecipe(recipeId, ingredients, power, result, time.toInt(), durability.toInt(), icon)
+            return SieveRecipe(recipeId, ingredients, power, result, time.toInt(), durability.toInt())
         }
 
         override fun fromNetwork(recipeId: ResourceLocation, buffer: FriendlyByteBuf): SieveRecipe {
@@ -85,8 +82,7 @@ class SieveRecipe(
             val power = buffer.readInt()
             val time = buffer.readInt()
             val durability = buffer.readInt()
-            val icon = buffer.readItem()
-            return SieveRecipe(recipeId, ingredients, power, output, time, durability, icon)
+            return SieveRecipe(recipeId, ingredients, power, output, time, durability)
         }
 
         override fun toNetwork(buffer: FriendlyByteBuf, recipe: SieveRecipe) {
@@ -97,7 +93,6 @@ class SieveRecipe(
             buffer.writeInt(recipe.power)
             buffer.writeInt(recipe.time)
             buffer.writeInt(recipe.durability)
-            buffer.writeItem(recipe.icon)
         }
 
 

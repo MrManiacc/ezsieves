@@ -18,6 +18,7 @@ import com.github.sieves.registry.internal.net.NetworkRegistry
 import com.github.sieves.util.registerAll
 import com.github.sieves.util.resLoc
 import com.github.sieves.util.tile
+import com.github.toysol.compat.top.TopPlugin
 import net.minecraft.client.gui.screens.MenuScreens
 import net.minecraft.client.renderer.ItemBlockRenderTypes
 import net.minecraft.client.renderer.RenderType
@@ -32,7 +33,10 @@ import net.minecraft.world.level.block.state.BlockBehaviour
 import net.minecraft.world.level.material.Material
 import net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers
 import net.minecraftforge.eventbus.api.IEventBus
+import net.minecraftforge.fml.InterModComms
+import net.minecraftforge.fml.ModList
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent
+import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent
 import net.minecraftforge.network.IContainerFactory
 import net.minecraftforge.registries.ForgeRegistries
 
@@ -140,6 +144,11 @@ object Registry : IRegister {
 
         modBus.addListener<RegisterRenderers> {
             it.registerBlockEntityRenderer(Tiles.Sieve) { SieveRenderer() }
+        }
+        modBus.addListener { event: InterModEnqueueEvent ->
+            if (ModList.get().isLoaded("theoneprobe")) {
+                InterModComms.sendTo("theoneprobe", "getTheOneProbe") { TopPlugin() }
+            }
         }
     }
 

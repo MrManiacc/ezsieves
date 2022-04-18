@@ -1,20 +1,17 @@
 {
   "type": "sieves:sieve",
-  "time": "120",
+  "time": "60",
   "durability": "1",
-  "power": "20",
+  "power": "5",
   "ingredients": [
     {
       "item": "minecraft:gravel"
     },
     {
-      "item": "minecraft:stone_shovel"
+      "tag": "minecraft:shovels"
     }
   ],
   "result": {
     "item": "minecraft:sand"
-  },
-  "icon": {
-    "item": "minecraft:stone_shovel"
   }
 }

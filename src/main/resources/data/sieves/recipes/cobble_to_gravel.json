@@ -1,20 +1,17 @@
 {
   "type": "sieves:sieve",
-  "time": "800",
-  "durability": "2",
-  "power": "60",
+  "time": "60",
+  "durability": "1",
+  "power": "5",
   "ingredients": [
     {
       "item": "minecraft:cobblestone"
     },
     {
-      "tag": "minecraft:pickaxe"
+      "tag": "minecraft:pickaxes"
     }
   ],
   "result": {
     "item": "minecraft:gravel"
-  },
-  "icon": {
-    "item": "minecraft:iron_pickaxe"
   }
 }

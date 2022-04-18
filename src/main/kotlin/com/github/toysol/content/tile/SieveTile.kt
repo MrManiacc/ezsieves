@@ -148,7 +148,9 @@ class SieveTile(pos: BlockPos, state: BlockState) : BlockEntity(Registry.Tiles.S
         tag.putInt("progress", progress)
         tag.putInt("energyval", energy)
         tag.putInt("target", targetProgress)
+        tag.putInt("percent", percent)
         tag.putInt("targetenergy", targetEnergy)
+        tag.putInt("targetdamage", targetDamage)
         tag.put("result", targetResult.serializeNBT())
         tag.put("config", config.serializeNBT())
     }
@@ -159,9 +161,11 @@ class SieveTile(pos: BlockPos, state: BlockState) : BlockEntity(Registry.Tiles.S
         outputInv.deserializeNBT(tag.getCompound("output"))
         energyStore.deserializeNBT(tag.get("energy"))
         progress = tag.getInt("progress")
+        percent = tag.getInt("percent")
         energy = tag.getInt("energyval")
         targetProgress = tag.getInt("target")
-        targetDamage = tag.getInt("targetenergy")
+        targetEnergy = tag.getInt("targetenergy")
+        targetDamage = tag.getInt("targetdamage")
         targetResult.deserializeNBT(tag.getCompound("result"))
         config.deserializeNBT(tag.getCompound("config"))
     }
@@ -205,8 +209,8 @@ class SieveTile(pos: BlockPos, state: BlockState) : BlockEntity(Registry.Tiles.S
         }
     }
 
-    fun getItemInSlot(slot: Int): ItemStack {
-        return inputHandler.map { inv: ItemStackHandler ->
+    fun getItemInSlot(slot: Int, output: Boolean = false): ItemStack {
+        return (if (output) outputHandler else inputHandler).map { inv: ItemStackHandler ->
             inv.getStackInSlot(
                 slot
             )
@@ -248,12 +252,10 @@ class SieveTile(pos: BlockPos, state: BlockState) : BlockEntity(Registry.Tiles.S
                 val cap = be.getCapability(CapabilityEnergy.ENERGY, key.opposite)
                 if (cap.isPresent) {
                     val other = cap.resolve().get()
-                    if (energyStore.energyStored < energyStore.maxEnergyStored - 20000) {
-                        val extracted = other.extractEnergy(20000, false)
+                        val extracted = other.extractEnergy(1000, false)
                         val leftOver = energyStore.receiveEnergy(extracted, false)
-                        val rem = 20000 - leftOver
+                        val rem = 1000 - leftOver
                         other.receiveEnergy(rem, false)
-                    }
                 }
             }
         }

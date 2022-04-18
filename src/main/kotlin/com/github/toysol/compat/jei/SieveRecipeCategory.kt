@@ -65,7 +65,7 @@ class SieveRecipeCategory(private val helper: IGuiHelper) : IRecipeCategory<Siev
         )
         Minecraft.getInstance().font.draw(
             stack,
-            "total power:: ${NumberFormat.getIntegerInstance().format(recipe.power * recipe.time)}rf",
+            "total power: ${NumberFormat.getIntegerInstance().format(recipe.power * recipe.time)}rf",
             5f,
             70f,
             0x404040

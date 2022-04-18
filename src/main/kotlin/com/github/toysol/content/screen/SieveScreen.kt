@@ -57,13 +57,61 @@ class SieveScreen(
         val energyPercent = ((energy / 100f) * 68).roundToInt()
         blit(stack, this.leftPos + 165, this.topPos + 8, 0, 114, 3, energyPercent)
 
-        if(configure){
-            renderButtonToolTip(stack, mouseX.toDouble(), mouseY.toDouble(), Configuration.Side.Front, Direction.NORTH, 24, 39)
-            renderButtonToolTip(stack, mouseX.toDouble(), mouseY.toDouble(), Configuration.Side.Left, Direction.WEST, 12, 39)
-            renderButtonToolTip(stack, mouseX.toDouble(), mouseY.toDouble(), Configuration.Side.Right, Direction.EAST, 36, 39)
-            renderButtonToolTip(stack, mouseX.toDouble(), mouseY.toDouble(), Configuration.Side.Back, Direction.SOUTH, 36, 51)
-            renderButtonToolTip(stack, mouseX.toDouble(), mouseY.toDouble(), Configuration.Side.Top, Direction.UP, 24, 27)
-            renderButtonToolTip(stack, mouseX.toDouble(), mouseY.toDouble(), Configuration.Side.Bottom, Direction.DOWN, 24, 51)
+        if (configure) {
+            renderButtonToolTip(
+                stack,
+                mouseX.toDouble(),
+                mouseY.toDouble(),
+                Configuration.Side.Front,
+                Direction.NORTH,
+                24,
+                39
+            )
+            renderButtonToolTip(
+                stack,
+                mouseX.toDouble(),
+                mouseY.toDouble(),
+                Configuration.Side.Left,
+                Direction.WEST,
+                12,
+                39
+            )
+            renderButtonToolTip(
+                stack,
+                mouseX.toDouble(),
+                mouseY.toDouble(),
+                Configuration.Side.Right,
+                Direction.EAST,
+                36,
+                39
+            )
+            renderButtonToolTip(
+                stack,
+                mouseX.toDouble(),
+                mouseY.toDouble(),
+                Configuration.Side.Back,
+                Direction.SOUTH,
+                36,
+                51
+            )
+            renderButtonToolTip(
+                stack,
+                mouseX.toDouble(),
+                mouseY.toDouble(),
+                Configuration.Side.Top,
+                Direction.UP,
+                24,
+                27
+            )
+            renderButtonToolTip(
+                stack,
+                mouseX.toDouble(),
+                mouseY.toDouble(),
+                Configuration.Side.Bottom,
+                Direction.DOWN,
+                24,
+                51
+            )
             renderAutoButtonsHover(stack, mouseX.toDouble(), mouseY.toDouble())
         }
 
@@ -336,12 +384,19 @@ class SieveScreen(
         if (isHovering(163, 8, 5, 67, pMouseX.toDouble(), pMouseY.toDouble())) {
             val progress = container.data.get(1)
             val percent = ((progress / 100f) * 100_000)
-            renderTooltip(
-                pPoseStack,
-                TextComponent("power: §6${NumberFormat.getIntegerInstance().format(percent)}rf/100,000rf"),
-                pMouseX,
-                pMouseY
-            )
+            if (!hasShiftDown())
+                renderTooltip(
+                    pPoseStack,
+                    TextComponent("power: §6${NumberFormat.getIntegerInstance().format(percent)}rf/100,000rf"),
+                    pMouseX,
+                    pMouseY
+                )
+            else
+                renderTooltip(
+                    pPoseStack,
+                    TextComponent("using: §6${tile?.targetEnergy}rf/t"),
+                    pMouseX,
+                    pMouseY)
         }
         this.renderTooltip(pPoseStack, pMouseX, pMouseY)
 
