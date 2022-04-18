@@ -1,13 +1,14 @@
-package com.github.toysol.registry.internal
+package com.github.sieves.registry.internal
 
+import com.github.sieves.content.container.SieveContainer
 import com.google.common.collect.Queues
 import net.minecraft.resources.ResourceKey
 import net.minecraftforge.eventbus.api.IEventBus
+import net.minecraftforge.network.IContainerFactory
 import net.minecraftforge.registries.DeferredRegister
 import net.minecraftforge.registries.IForgeRegistry
 import net.minecraftforge.registries.IForgeRegistryEntry
 import net.minecraftforge.registries.RegistryObject
-import thedarkcolour.kotlinforforge.forge.MOD_BUS
 import java.util.*
 import java.util.function.Supplier
 import kotlin.collections.HashMap

@@ -1,15 +1,22 @@
-package com.github.toysol.util
+package com.github.sieves.util
 
-import com.github.toysol.Toys
-import com.github.toysol.registry.internal.IRegister
-import com.github.toysol.registry.internal.Registry
+import com.github.sieves.Toys
+import com.github.sieves.registry.internal.IRegister
+import com.github.sieves.registry.internal.Registry
+import com.github.sieves.registry.internal.net.Packet
 import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
+import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.phys.BlockHitResult
 import net.minecraftforge.eventbus.api.IEventBus
+import net.minecraftforge.server.ServerLifecycleHooks
 import org.apache.logging.log4j.LogManager
 import thedarkcolour.kotlinforforge.forge.FORGE_BUS
 import thedarkcolour.kotlinforforge.forge.MOD_BUS
@@ -25,6 +32,9 @@ object Log {
     inline fun trace(supplier: () -> String) = logger.trace(supplier())
 }
 
+fun Packet.getLevel(key: ResourceKey<Level>): Level {
+    return ServerLifecycleHooks.getCurrentServer().getLevel(key)!!
+}
 
 /**
  * Gets a resource location based upon the give string
@@ -57,4 +67,26 @@ inline fun <reified T : IRegister> T.registerAll(
             }
         }
     }
+}
+
+/**
+ * This will raytrace the given distance for the given player
+ */
+fun Player.rayTrace(distance: Double = 75.0): BlockHitResult {
+    val rayTraceResult = pick(distance, 0f, false) as BlockHitResult
+    var xm = rayTraceResult.location.x
+    var ym = rayTraceResult.location.y
+    var zm = rayTraceResult.location.z
+    var pos = BlockPos(xm, ym, zm)
+    val block = level.getBlockState(pos)
+    if (block.isAir) {
+        if (rayTraceResult.direction == Direction.SOUTH)
+            zm--
+        if (rayTraceResult.direction == Direction.EAST)
+            xm--
+        if (rayTraceResult.direction == Direction.UP)
+            ym--
+    }
+    pos = BlockPos(xm, ym, zm)
+    return BlockHitResult(rayTraceResult.location, rayTraceResult.direction, pos, false)
 }

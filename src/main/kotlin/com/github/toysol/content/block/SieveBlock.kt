@@ -1,8 +1,12 @@
-package com.github.toysol.content.block
+package com.github.sieves.content.block
 
-import com.github.toysol.content.container.SieveContainer
-import com.github.toysol.content.tile.SieveTile
-import com.github.toysol.registry.Registry
+import com.github.sieves.content.container.SieveContainer
+import com.github.sieves.content.tile.SieveTile
+import com.github.sieves.registry.Registry
+import com.github.sieves.registry.Registry.Net
+import com.github.sieves.registry.internal.net.ConfigurePacket
+import com.github.sieves.util.Log.info
+import com.github.sieves.util.getLevel
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.server.level.ServerPlayer
@@ -25,7 +29,9 @@ import net.minecraft.world.phys.shapes.BooleanOp
 import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.shapes.Shapes
 import net.minecraft.world.phys.shapes.VoxelShape
+import net.minecraftforge.network.NetworkEvent
 import net.minecraftforge.network.NetworkHooks
+import java.awt.SystemColor.info
 
 
 class SieveBlock(properties: Properties) : Block(properties), EntityBlock {
@@ -34,6 +40,20 @@ class SieveBlock(properties: Properties) : Block(properties), EntityBlock {
     private val southShape = south()
     private val eastShape = east()
     private val westShape = west()
+
+    init {
+        Net.Configure.serverListener(::onConfiguration)
+    }
+
+    private fun onConfiguration(configurePacket: ConfigurePacket, context: NetworkEvent.Context): Boolean {
+        val level = configurePacket.getLevel(configurePacket.world)
+        val blockEntity = level.getBlockEntity(configurePacket.blockPos)
+        if (blockEntity !is SieveTile) return false
+        blockEntity.config.deserializeNBT(configurePacket.config.serializeNBT())
+        blockEntity.update()
+        info { "Updated configuration: $configurePacket" }
+        return true
+    }
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : BlockEntity?> getTicker(

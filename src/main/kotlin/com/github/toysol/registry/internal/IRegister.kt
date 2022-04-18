@@ -1,4 +1,4 @@
-package com.github.toysol.registry.internal
+package com.github.sieves.registry.internal
 
 import net.minecraftforge.eventbus.api.IEventBus
 import thedarkcolour.kotlinforforge.forge.FORGE_BUS

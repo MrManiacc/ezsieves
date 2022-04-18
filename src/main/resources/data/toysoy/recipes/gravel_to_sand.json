@@ -1,5 +1,5 @@
 {
-  "type": "toysol:sieve",
+  "type": "sieves:sieve",
   "time": "120",
   "durability": "1",
   "power": "20",

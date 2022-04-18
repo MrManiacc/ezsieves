@@ -1,18 +1,18 @@
 {
   "variants": {
     "facing=north": {
-      "model": "toysol:block/sieve"
+      "model": "sieves:block/sieve"
     },
     "facing=south": {
-      "model": "toysol:block/sieve",
+      "model": "sieves:block/sieve",
       "y": 180
     },
     "facing=west": {
-      "model": "toysol:block/sieve",
+      "model": "sieves:block/sieve",
       "y": 270
     },
     "facing=east": {
-      "model": "toysol:block/sieve",
+      "model": "sieves:block/sieve",
       "y": 90
     }
   }

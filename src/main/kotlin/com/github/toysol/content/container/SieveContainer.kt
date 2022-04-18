@@ -1,27 +1,35 @@
-package com.github.toysol.content.container
+package com.github.sieves.content.container
 
-import com.github.toysol.content.tile.SieveTile
-import com.github.toysol.registry.Registry
+import com.github.sieves.content.tile.SieveTile
+import com.github.sieves.registry.Registry
+import com.github.sieves.registry.Registry.Net
+import com.github.sieves.util.rayTrace
+import net.minecraft.client.Minecraft
 import net.minecraft.core.BlockPos
+import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.*
 import net.minecraft.world.item.ItemStack
+import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.items.IItemHandler
 import net.minecraftforge.items.ItemStackHandler
 import net.minecraftforge.items.SlotItemHandler
+import thedarkcolour.kotlinforforge.forge.callWhenOn
 
 
 class SieveContainer(
-    id: Int,
+    val id: Int,
     private val inventory: Inventory,
     private val slotsIn: IItemHandler = ItemStackHandler(2),
     private val slotsOut: IItemHandler = ItemStackHandler(1),
-    private val pos: BlockPos = BlockPos.ZERO,
+    var pos: BlockPos = BlockPos.ZERO,
     val data: ContainerData = SimpleContainerData(2),
-    val player: Player = inventory.player
+    val player: Player = inventory.player,
+    val buf: FriendlyByteBuf? = null
 ) : AbstractContainerMenu(Registry.Containers.Sieve, id) {
     private val containerAccess = ContainerLevelAccess.create(inventory.player.level, pos)
+    var tile: SieveTile? = null
 
     init {
         val size = 18
@@ -41,6 +49,11 @@ class SieveContainer(
         addSlot(SlotItemHandler(slotsIn, 1, 66, 33))
         addSlot(SlotItemHandler(slotsOut, 0, 124, 35))
         addDataSlots(data)
+        callWhenOn(Dist.CLIENT) {
+            val tile = Minecraft.getInstance().level?.getBlockEntity(pos)
+            if (tile is SieveTile) this.tile = tile
+        }
+
     }
 
 
@@ -54,9 +67,9 @@ class SieveContainer(
         if (slot.hasItem()) {
             val stack = slot.item
             retStack = stack.copy()
-            val size = slots.size - player.inventory.containerSize
+            val size = player.inventory.containerSize - 3
             if (index < size) {
-                if (!moveItemStackTo(stack, 0, slots.size, true)) return ItemStack.EMPTY
+                if (!moveItemStackTo(stack, 0, size, true)) return ItemStack.EMPTY
             } else if (!moveItemStackTo(stack, 0, size, false)) return ItemStack.EMPTY
             if (stack.isEmpty || stack.count == 0) {
                 slot.set(ItemStack.EMPTY)
@@ -72,7 +85,16 @@ class SieveContainer(
     companion object {
         fun getServerContainer(sieve: SieveTile, pos: BlockPos): MenuConstructor {
             return MenuConstructor { id, inv, _ ->
-                SieveContainer(id, inv, sieve.inputInv, sieve.outputInv, pos, player = inv.player, data = SieveContainerData(2, sieve))
+                SieveContainer(
+                    id,
+                    inv,
+                    sieve.inputInv,
+                    sieve.outputInv,
+                    pos,
+                    player = inv.player,
+                    data = SieveContainerData(2, sieve)
+
+                )
             }
         }
 

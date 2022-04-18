@@ -1,6 +1,6 @@
-package com.github.toysol.content.container
+package com.github.sieves.content.container
 
-import com.github.toysol.content.tile.SieveTile
+import com.github.sieves.content.tile.SieveTile
 import net.minecraft.world.inventory.SimpleContainerData
 
 class SieveContainerData(amount: Int, val tile: SieveTile) : SimpleContainerData(amount) {

@@ -1,8 +1,8 @@
-package com.github.toysol.content.render
+package com.github.sieves.content.render
 
-import com.github.toysol.content.block.SieveBlock.Companion.FACING
-import com.github.toysol.content.tile.SieveTile
-import com.github.toysol.registry.Registry
+import com.github.sieves.content.block.SieveBlock.Companion.FACING
+import com.github.sieves.content.tile.SieveTile
+import com.github.sieves.registry.Registry
 import com.mojang.blaze3d.vertex.PoseStack
 import com.mojang.math.Quaternion
 import net.minecraft.client.Minecraft
@@ -26,7 +26,7 @@ class SieveRenderer : BlockEntityRenderer<SieveTile> {
     private val player = Minecraft.getInstance().entityModels.bakeLayer(ModelLayers.PLAYER)
     private val model = PlayerModel<AbstractClientPlayer>(player, false)
     private var decreasing = false
-
+    private var lastPlayed = System.currentTimeMillis()
     override fun render(
         pBlockEntity: SieveTile,
         pPartialTick: Float,
@@ -44,16 +44,23 @@ class SieveRenderer : BlockEntityRenderer<SieveTile> {
         val scaled = percent * 0.01
         val realScaled = realPercent * 0.01
         if (rot > 270 || decreasing) {
-            rot -= Minecraft.getInstance().deltaFrameTime * 2
+            rot -= Minecraft.getInstance().deltaFrameTime * 10
             decreasing = true
-        } else rot += Minecraft.getInstance().deltaFrameTime * 2
+        } else rot += Minecraft.getInstance().deltaFrameTime * 5
 
         if (rot < 180 && decreasing) {
             decreasing = false
         }
+        val now = System.currentTimeMillis()
+        if (pBlockEntity.progress >= pBlockEntity.targetProgress - 1 && now - lastPlayed > 50) {
+            Minecraft.getInstance().level?.playSound(Minecraft.getInstance().player, pBlockEntity.blockPos, SoundEvents.ENDER_CHEST_CLOSE,SoundSource.BLOCKS, 0.1f, 0.8f)
+            lastPlayed = now
+        }
         var visble = true
-        if(realPercent <=10) visble = false
+        if (realPercent <= 5) visble = false
         if (pBlockEntity.getItemInSlot(0).isEmpty || pBlockEntity.getItemInSlot(1).isEmpty) visble = false
+        var value = if (visble) rot else 0.0
+        var value2 = if (visble) fullRot else 0.0
         fullRot += Minecraft.getInstance().deltaFrameTime * ((realPercent * 0.5))
         fullRot %= 360
         rot %= 360
@@ -61,83 +68,81 @@ class SieveRenderer : BlockEntityRenderer<SieveTile> {
         stack.pushPose()
 //        player.render(stack, pBufferSource.getBuffer(), pPackedLight, pPackedOverlay)
         stack.translate(0.5 + (normal.x * 0.25), 0.9, 0.5 + (normal.z * 0.25))
-        if (visble) {
-            when (front) {
-                Direction.NORTH -> {
+        when (front) {
+            Direction.NORTH -> {
 
-                    model.rightArm.xRot = Math.toRadians(rot).toFloat()
-                    model.rightArm.zRot = 0F
-                    model.leftArm.xRot = Math.toRadians(rot).toFloat()
-                    stack.mulPose(
-                        Quaternion.fromXYZ(
-                            Math.toRadians(180.0).toFloat(),
-                            Math.toRadians(0.0).toFloat(),
-                            0f
-                        )
+                model.rightArm.xRot = Math.toRadians(value).toFloat()
+                model.rightArm.zRot = 0F
+                model.leftArm.xRot = Math.toRadians(value).toFloat()
+                stack.mulPose(
+                    Quaternion.fromXYZ(
+                        Math.toRadians(180.0).toFloat(),
+                        Math.toRadians(0.0).toFloat(),
+                        0f
                     )
-                }
-                Direction.SOUTH -> {
-                    model.rightArm.xRot = Math.toRadians(rot).toFloat()
-                    model.leftArm.xRot = Math.toRadians(rot).toFloat()
-                    model.rightArm.zRot = 0F
-                    stack.mulPose(
-                        Quaternion.fromXYZ(
-                            Math.toRadians(180.0).toFloat(),
-                            Math.toRadians(180.0).toFloat(),
-                            0f
-                        )
-                    )
-                }
-                Direction.EAST -> {
-                    model.rightArm.zRot = Math.toRadians(rot).toFloat()
-                    model.leftArm.xRot = Math.toRadians(rot).toFloat()
-                    model.rightArm.xRot = 0F
-                    stack.mulPose(
-                        Quaternion.fromXYZ(
-                            0f,
-                            Math.toRadians(90.0).toFloat(),
-                            Math.toRadians(180.0).toFloat(),
-                        )
-                    )
-                }
-                Direction.WEST -> {
-                    model.rightArm.xRot = Math.toRadians(rot).toFloat()
-                    model.leftArm.xRot = Math.toRadians(rot).toFloat()
-                    model.rightArm.zRot = 0F
-                    stack.mulPose(
-                        Quaternion.fromXYZ(
-                            0f,
-                            Math.toRadians(270.0).toFloat(),
-                            Math.toRadians(180.0).toFloat(),
-                        )
-                    )
-                }
+                )
             }
-            stack.scale(0.45f, 0.45f, 0.45f)
-            model.renderToBuffer(
-                stack,
-                pBufferSource.getBuffer(model.renderType(Minecraft.getInstance().player!!.skinTextureLocation)),
-                pPackedLight,
-                pPackedOverlay,
-                1f,
-                1f,
-                1f,
-                1f
-            )
+            Direction.SOUTH -> {
+                model.rightArm.xRot = Math.toRadians(value).toFloat()
+                model.leftArm.xRot = Math.toRadians(value).toFloat()
+                model.rightArm.zRot = 0F
+                stack.mulPose(
+                    Quaternion.fromXYZ(
+                        Math.toRadians(180.0).toFloat(),
+                        Math.toRadians(180.0).toFloat(),
+                        0f
+                    )
+                )
+            }
+            Direction.EAST -> {
+                model.rightArm.xRot = Math.toRadians(value).toFloat()
+                model.rightArm.zRot = Math.toRadians(0.0).toFloat()
+                model.leftArm.xRot = Math.toRadians(value).toFloat()
+                stack.mulPose(
+                    Quaternion.fromXYZ(
+                        0f,
+                        Math.toRadians(90.0).toFloat(),
+                        Math.toRadians(180.0).toFloat(),
+                    )
+                )
+            }
+            Direction.WEST -> {
+                model.rightArm.xRot = Math.toRadians(value).toFloat()
+                model.leftArm.xRot = Math.toRadians(value).toFloat()
+                model.rightArm.zRot = 0F
+                stack.mulPose(
+                    Quaternion.fromXYZ(
+                        0f,
+                        Math.toRadians(270.0).toFloat(),
+                        Math.toRadians(180.0).toFloat(),
+                    )
+                )
+            }
         }
+        stack.scale(0.45f, 0.45f, 0.45f)
+        model.renderToBuffer(
+            stack,
+            pBufferSource.getBuffer(model.renderType(Minecraft.getInstance().player!!.skinTextureLocation)),
+            pPackedLight,
+            pPackedOverlay,
+            1f,
+            1f,
+            1f,
+            1f
+        )
         stack.popPose()
         stack.pushPose()
 //        stack.translate(0.5 + (normal.x * 0.25), 0.9, 0.5 + (normal.z * 0.25))
+        value = if (visble) rot else 0.0
 
         stack.translate(0.5, 0.8, 0.5)
         var factor = 0.08
-        val value = if (visble) fullRot else 0.0
         when (front) {
             Direction.NORTH -> {
                 stack.mulPose(
                     Quaternion.fromXYZ(
                         Math.toRadians(0.0).toFloat(),
-                        Math.toRadians(270 - value).toFloat(),
+                        Math.toRadians(270 - value2).toFloat(),
                         Math.toRadians(180.0).toFloat(),
                     )
                 )
@@ -146,7 +151,7 @@ class SieveRenderer : BlockEntityRenderer<SieveTile> {
                 stack.mulPose(
                     Quaternion.fromXYZ(
                         Math.toRadians(0.0).toFloat(),
-                        Math.toRadians(90.0 - value).toFloat(),
+                        Math.toRadians(90.0 - value2).toFloat(),
                         Math.toRadians(180.0).toFloat(),
                     )
                 )
@@ -156,7 +161,7 @@ class SieveRenderer : BlockEntityRenderer<SieveTile> {
                 stack.mulPose(
                     Quaternion.fromXYZ(
                         Math.toRadians(0.0).toFloat(),
-                        Math.toRadians(270.0 - value).toFloat(),
+                        Math.toRadians(270.0 - value2).toFloat(),
                         Math.toRadians(180.0).toFloat(),
                     )
                 )
@@ -165,7 +170,7 @@ class SieveRenderer : BlockEntityRenderer<SieveTile> {
                 stack.mulPose(
                     Quaternion.fromXYZ(
                         Math.toRadians(0.0).toFloat(),
-                        Math.toRadians(270.0 - value).toFloat(),
+                        Math.toRadians(270.0 - value2).toFloat(),
                         Math.toRadians(180.0).toFloat(),
                     )
                 )
@@ -189,16 +194,24 @@ class SieveRenderer : BlockEntityRenderer<SieveTile> {
         stack.pushPose()
         stack.translate(0.5, 0.5, 0.5)
         stack.mulPose(Quaternion.fromXYZ(0f, 0f, 0f))
-        val scale = 0.1f + (realScaled.toFloat() * 0.2f)
+        val scale = (rot.toFloat() / 360) * 1.2f
         if (visble)
-            stack.scale(rot.toFloat() / 360, rot.toFloat() / 360, rot.toFloat() / 360)
+            stack.scale(scale, scale, scale)
         else
             stack.scale(0.8f, 0.8f, 0.8f)
         val x: Double = pBlockEntity.blockPos.x.toDouble() + 0.5
         val y: Double = pBlockEntity.blockPos.y.toDouble() + 0.5
         val z: Double = pBlockEntity.blockPos.z.toDouble() + 0.5
         if (realPercent >= 90) {
-            Minecraft.getInstance().level?.addParticle(ParticleTypes.SMOKE, x, y, z, 0.0, 0.0, 0.0)
+            Minecraft.getInstance().level?.addParticle(
+                ParticleTypes.SMOKE,
+                x,
+                y,
+                z,
+                normal.x * 0.75,
+                0.2,
+                normal.z * 0.75
+            )
         }
         if (realPercent >= 98) {
 //            Minecraft.getInstance().level?.playSound(
@@ -211,8 +224,15 @@ class SieveRenderer : BlockEntityRenderer<SieveTile> {
 //                1f,
 //                1f
 //            )
-            Minecraft.getInstance().level?.addParticle(ParticleTypes.FLAME, x, y, z, 0.0, 0.0, 0.0)
-
+            Minecraft.getInstance().level?.addParticle(
+                ParticleTypes.FLAME,
+                x,
+                y,
+                z,
+                normal.x * 0.2,
+                0.2,
+                normal.z * 0.2
+            )
         }
         Minecraft.getInstance().itemRenderer.renderStatic(
             input,

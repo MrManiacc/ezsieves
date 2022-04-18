@@ -1,8 +1,8 @@
-package com.github.toysol.recipes
+package com.github.sieves.recipes
 
-import com.github.toysol.recipes.internal.ISieveRecipe
-import com.github.toysol.registry.Registry
-import com.github.toysol.registry.Registry.RecipeTypes.Sieve
+import com.github.sieves.recipes.internal.ISieveRecipe
+import com.github.sieves.registry.Registry
+import com.github.sieves.registry.Registry.RecipeTypes.Sieve
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import net.minecraft.core.NonNullList

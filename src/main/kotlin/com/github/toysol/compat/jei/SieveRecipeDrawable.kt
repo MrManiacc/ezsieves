@@ -1,4 +1,4 @@
-package com.github.toysol.compat.jei
+package com.github.sieves.compat.jei
 
 class SieveRecipeDrawable {
 }

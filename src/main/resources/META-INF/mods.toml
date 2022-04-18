@@ -6,15 +6,15 @@ loaderVersion="[3,)" # Require at least 3.x
 license='LGPL'
 
 [[mods]]
-modId="toysol"
+modId="sieves"
 version="${file.jarVersion}"
-displayName="ResourcefulSoilders"
+displayName="Sieves"
 credits="dooZyz"
 authors="dooZyz"
 description='''
-Use little men to automate allotta stuff.
+Automate
 '''
-[[dependencies.toysol]]
+[[dependencies.sieves]]
     modId="forge"
     mandatory=true
     versionRange="[40,)"

@@ -1,6 +1,6 @@
-package com.github.toysol.recipes.internal
+package com.github.sieves.recipes.internal
 
-import com.github.toysol.util.resLoc
+import com.github.sieves.util.resLoc
 import net.minecraft.core.Registry
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.Container

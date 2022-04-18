@@ -21,9 +21,9 @@ apply plugin: 'kotlinx-serialization'
 
 apply from: 'https://raw.githubusercontent.com/thedarkcolour/KotlinForForge/site/thedarkcolour/kotlinforforge/gradle/kff-3.1.0.gradle'
 
-version = '1.18.2-0.4.1-beta'
-group = 'com.github.toysol'
-archivesBaseName = 'toysol'
+version = '1.18.2-1.0.0'
+group = 'com.github.sieves'
+archivesBaseName = 'sieves'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 ext {
@@ -48,7 +48,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                toysol {
+                sieves {
                     source sourceSets.main
                 }
             }
@@ -61,7 +61,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                toysol {
+                sieves {
                     source sourceSets.main
                 }
 
@@ -83,6 +83,12 @@ repositories {
         name = "ModMaven"
         url = "https://modmaven.dev/"
     }
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 // Include assets and data from data generators
@@ -97,6 +103,8 @@ dependencies {
     // at runtime, use the full JEI jar
     runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
     runtimeOnly(fg.deobf("mekanism:Mekanism:1.18.2-10.2.0.459:all"))
+    runtimeOnly(fg.deobf("curse.maven:ato-405593:3751978"))
+    runtimeOnly(fg.deobf("curse.maven:the-one-probe-245211:3671753"))
 }
 
 
@@ -105,7 +113,7 @@ task output(type: Copy) {
     from "build/reobfJar"
     into 'builds'
     rename { String fileName ->
-        fileName.replace("output", "toysol-${project.version}")
+        fileName.replace("output", "sieves-${project.version}")
     }
 }
 
@@ -117,12 +125,12 @@ jar {
 
     manifest {
         attributes([
-                'Specification-Title'     : "toysol",
-                'Specification-Vendor'    : "toysolsareus",
+                'Specification-Title'     : "sieves",
+                'Specification-Vendor'    : "sievessareus",
                 'Specification-Version'   : "1", // We are version 1 of ourselves
                 'Implementation-Title'    : project.name,
                 'Implementation-Version'  : project.version,
-                'Implementation-Vendor'   : "toysolmodsareus",
+                'Implementation-Vendor'   : "sievesmodsareus",
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
         ])
     }

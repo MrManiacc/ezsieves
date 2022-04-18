@@ -1,8 +1,10 @@
-package com.github.toysol.content.tile
+package com.github.sieves.content.tile
 
-import com.github.toysol.Toys
-import com.github.toysol.content.container.SieveContainer
-import com.github.toysol.registry.Registry
+import com.github.sieves.Toys
+import com.github.sieves.content.block.SieveBlock
+import com.github.sieves.content.container.SieveContainer
+import com.github.sieves.content.tile.internal.Configuration
+import com.github.sieves.registry.Registry
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.nbt.CompoundTag
@@ -26,6 +28,7 @@ import net.minecraftforge.common.util.LazyOptional
 import net.minecraftforge.energy.CapabilityEnergy
 import net.minecraftforge.energy.EnergyStorage
 import net.minecraftforge.items.CapabilityItemHandler
+import net.minecraftforge.items.ItemHandlerHelper
 import net.minecraftforge.items.ItemStackHandler
 import net.minecraftforge.network.NetworkHooks
 import kotlin.math.roundToInt
@@ -40,18 +43,19 @@ class SieveTile(pos: BlockPos, state: BlockState) : BlockEntity(Registry.Tiles.S
     var targetEnergy = 0
     private var requiresUpdate = false
     private var targetDamage = 1
-    private var targetResult = ItemStack.EMPTY
+    var targetResult = ItemStack.EMPTY
     private var tick = 0
-    private val threshold = 20
+    private val threshold = 8
     val inputInv = createInventory(2, false)
     private val inputHandler = LazyOptional.of { inputInv }
     val outputInv = createInventory(1, true)
     private val outputHandler = LazyOptional.of { outputInv }
     val energyStore = createEnergy()
     private val energyHandler = LazyOptional.of { energyStore }
+    val config = Configuration()
 
     private fun createEnergy(): EnergyStorage {
-        return object : EnergyStorage(50_000) {
+        return object : EnergyStorage(100_000) {
             override fun receiveEnergy(maxReceive: Int, simulate: Boolean): Int {
                 requiresUpdate = true
                 return super.receiveEnergy(maxReceive, simulate)
@@ -81,6 +85,26 @@ class SieveTile(pos: BlockPos, state: BlockState) : BlockEntity(Registry.Tiles.S
                 update()
                 craft()
                 return super.insertItem(slot, stack, simulate)
+            }
+        }
+    }
+
+    fun getRelative(side: Configuration.Side): Direction {
+        val front = blockState.getValue(SieveBlock.FACING)
+        return when (side) {
+            Configuration.Side.Top -> Direction.UP
+            Configuration.Side.Bottom -> Direction.DOWN
+            Configuration.Side.Front -> {
+                front
+            }
+            Configuration.Side.Back -> {
+                front.opposite
+            }
+            Configuration.Side.Left -> {
+                front.opposite.counterClockWise
+            }
+            Configuration.Side.Right -> {
+                front.opposite.clockWise
             }
         }
     }
@@ -125,6 +149,21 @@ class SieveTile(pos: BlockPos, state: BlockState) : BlockEntity(Registry.Tiles.S
         tag.putInt("energyval", energy)
         tag.putInt("target", targetProgress)
         tag.putInt("targetenergy", targetEnergy)
+        tag.put("result", targetResult.serializeNBT())
+        tag.put("config", config.serializeNBT())
+    }
+
+    override fun load(tag: CompoundTag) {
+        super.load(tag)
+        inputInv.deserializeNBT(tag.getCompound("input"))
+        outputInv.deserializeNBT(tag.getCompound("output"))
+        energyStore.deserializeNBT(tag.get("energy"))
+        progress = tag.getInt("progress")
+        energy = tag.getInt("energyval")
+        targetProgress = tag.getInt("target")
+        targetDamage = tag.getInt("targetenergy")
+        targetResult.deserializeNBT(tag.getCompound("result"))
+        config.deserializeNBT(tag.getCompound("config"))
     }
 
     override fun getUpdatePacket(): Packet<ClientGamePacketListener>? {
@@ -154,20 +193,16 @@ class SieveTile(pos: BlockPos, state: BlockState) : BlockEntity(Registry.Tiles.S
     }
 
     override fun <T> getCapability(cap: Capability<T>, side: Direction?): LazyOptional<T> {
-        if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-            if (side == null) return outputHandler.cast()
-            return when (side) {
-                Direction.UP -> inputHandler.cast()
-                Direction.DOWN -> outputHandler.cast()
-                else -> inputHandler.cast()
-            }
-        } else if (cap == CapabilityEnergy.ENERGY) {
-            return energyHandler.cast()
+        if (side == null && cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) return outputHandler.cast()
+        else if (side == null && cap == CapabilityEnergy.ENERGY) return energyHandler.cast()
+        else if (side == null) return super.getCapability(cap, side)
+
+        return when (config[side]) {
+            Configuration.SideConfig.InputItem -> if (CapabilityItemHandler.ITEM_HANDLER_CAPABILITY == cap) return inputHandler.cast() else LazyOptional.empty()
+            Configuration.SideConfig.InputPower -> if (CapabilityEnergy.ENERGY == cap) return energyHandler.cast() else LazyOptional.empty()
+            Configuration.SideConfig.OutputItem -> if (CapabilityItemHandler.ITEM_HANDLER_CAPABILITY == cap) outputHandler.cast() else LazyOptional.empty()
+            Configuration.SideConfig.None -> LazyOptional.empty()
         }
-        return super.getCapability(
-            cap, side
-        )
-//        return if (cap === CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) handler.cast() else
     }
 
     fun getItemInSlot(slot: Int): ItemStack {
@@ -178,16 +213,52 @@ class SieveTile(pos: BlockPos, state: BlockState) : BlockEntity(Registry.Tiles.S
         }.orElse(ItemStack.EMPTY)
     }
 
+    private fun automate() {
 
-    override fun load(tag: CompoundTag) {
-        super.load(tag)
-        inputInv.deserializeNBT(tag.getCompound("input"))
-        outputInv.deserializeNBT(tag.getCompound("output"))
-        energyStore.deserializeNBT(tag.get("energy"))
-        progress = tag.getInt("progress")
-        energy = tag.getInt("energyval")
-        targetProgress = tag.getInt("target")
-        targetDamage = tag.getInt("targetenergy")
+        for (key in Direction.values()) {
+            val value = config[key]
+            val be =
+                level?.getBlockEntity(blockPos.offset(key.normal))
+                    ?: continue
+            if (value == Configuration.SideConfig.OutputItem && config.autoExport) {
+                val cap = be.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, key.opposite)
+                if (cap.isPresent) {
+                    val extracted = outputInv.extractItem(0, 4, false)
+                    val leftOver = ItemHandlerHelper.insertItem(cap.resolve().get(), extracted, false)
+                    outputInv.insertItem(0, leftOver, false)
+                }
+            } else if (value == Configuration.SideConfig.InputItem && config.autoImport) {
+                val cap = be.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, key.opposite)
+                if (cap.isPresent) {
+                    val other = cap.resolve().get()
+                    for (slot in 0 until other.slots) {
+                        val extracted = cap.resolve().get().extractItem(slot, 4, false)
+                        val leftOver = inputInv.insertItem(0, extracted, false)
+                        if (leftOver.isEmpty && !extracted.isEmpty) break
+                        other.insertItem(slot, leftOver, false)
+                    }
+                    for (slot in 0 until other.slots) {
+                        val extracted = cap.resolve().get().extractItem(slot, 4, false)
+                        val leftOver = inputInv.insertItem(1, extracted, false)
+                        if (leftOver.isEmpty && !extracted.isEmpty) break
+                        other.insertItem(slot, leftOver, false)
+                    }
+                }
+            } else if (value == Configuration.SideConfig.InputPower && config.autoImport) {
+                val cap = be.getCapability(CapabilityEnergy.ENERGY, key.opposite)
+                if (cap.isPresent) {
+                    val other = cap.resolve().get()
+                    if (energyStore.energyStored < energyStore.maxEnergyStored - 20000) {
+                        val extracted = other.extractEnergy(20000, false)
+                        val leftOver = energyStore.receiveEnergy(extracted, false)
+                        val rem = 20000 - leftOver
+                        other.receiveEnergy(rem, false)
+                    }
+                }
+            }
+        }
+        update()
+
     }
 
     fun tick() {
@@ -200,6 +271,7 @@ class SieveTile(pos: BlockPos, state: BlockState) : BlockEntity(Registry.Tiles.S
         if (tick >= threshold) {
             if (!isCrafting) craft()
             tick = 0
+            automate()
         }
         if (isCrafting && this.energyStore.extractEnergy(targetEnergy, true) == targetEnergy) {
             progress++

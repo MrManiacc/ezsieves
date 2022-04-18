@@ -1,6 +1,6 @@
-package com.github.toysol.content.item
+package com.github.sieves.content.item
 
-import com.github.toysol.registry.Registry
+import com.github.sieves.registry.Registry
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.CreativeModeTab
 

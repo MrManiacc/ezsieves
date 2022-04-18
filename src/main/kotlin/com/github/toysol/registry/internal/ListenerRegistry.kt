@@ -1,4 +1,4 @@
-package com.github.toysol.registry.internal
+package com.github.sieves.registry.internal
 
 import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
