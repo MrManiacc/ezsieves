@@ -93,6 +93,9 @@ repositories {
         name 'tterrag maven'
         url "https://maven.k-4u.nl"
     }
+    maven {
+        url "https://maven.blakesmods.com"
+    }
 }
 
 // Include assets and data from data generators
@@ -110,6 +113,10 @@ dependencies {
     runtimeOnly(fg.deobf("mekanism:Mekanism:1.18.2-10.2.0.459:all"))
     runtimeOnly(fg.deobf("curse.maven:ato-405593:3751978"))
     runtimeOnly(fg.deobf("curse.maven:the-one-probe-245211:3671753"))
+    runtimeOnly(fg.deobf("curse.maven:spark-361579:3670050"))
+//    runtimeOnly(fg.deobf("curse.maven:pneumaticcraft-repressurized:281849"))
+    runtimeOnly(fg.deobf("com.blakebr0.cucumber:Cucumber:1.18.2-5.1.0"))
+    runtimeOnly(fg.deobf("com.blakebr0.mysticalagriculture:MysticalAgriculture:1.18.2-5.1.0"))
 }
 
 

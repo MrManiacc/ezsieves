@@ -20,7 +20,7 @@ Automate
     versionRange="[40,)"
     ordering="NONE"
     side="BOTH"
-[[dependencies.ressol]]
+[[dependencies.sieves]]
     modId="minecraft"
     mandatory=true
     versionRange="[1.18,)"

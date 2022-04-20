@@ -1,4 +1,15 @@
 {
-  "block.sieves.sieve": "Sieve Block",
-  "container.sieves.sieve": "Sieve"
+  "block.sieves.sieve": "Sieve",
+  "block.sieves.battery": "Battery",
+  "block.sieves.farmer": "Farmer",
+  "tile.sieves.battery": "Battery",
+  "item.sieves.linker": "Linker",
+  "item.sieves.speed": "Speed",
+  "item.sieves.efficiency": "Efficiency",
+  "itemGroup.sieves": "Sieves Mod",
+  "tab.sieves.player_power": "Player Power Module",
+  "tab.sieves.player_hunger": "Player Hunger Module",
+  "container.sieves.sieve": "Sieve",
+  "container.sieves.battery": "Battery",
+  "container.sieves.farmer": "Farmer"
 }
