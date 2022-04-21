@@ -59,11 +59,10 @@ object NativeTabs : IRegister {
             .withInit(::init)
             .withClientTick(::tickClient)
             .withServerTick(::tickServer)
-            .withServerClick { player, tab ->
-                Log.info { "Got click on server: ${tab.getSpec()}" }
+            .withServerClick {
+                Log.info { "Got click on server: ${it.getSpec()}" }
             }
             .build()
-
 
 
         private fun init(apiTab: ApiTab) {

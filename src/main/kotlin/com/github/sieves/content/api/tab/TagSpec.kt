@@ -129,15 +129,13 @@ data class TagSpec private constructor(
             return this
         }
 
-        fun withClientClick(ticker: (player: Player, tab: ApiTab) -> Unit): Builder {
-            isClientTicking = true
-            clientTicker = Optional.of(ticker)
+        fun withClientClick(ticker: (tab: ApiTab) -> Unit): Builder {
+            clientClick = ticker
             return this
         }
 
-        fun withServerClick(ticker: (player: ServerPlayer, tab: ApiTab) -> Unit): Builder {
-            isServerTicking = true
-            serverTicker = Optional.of(ticker)
+        fun withServerClick(ticker: (tab: ApiTab) -> Unit): Builder {
+            serverClick = ticker
             return this
         }
 
